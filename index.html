@@ -145,7 +145,7 @@
                             <div class="flex-1 md:mx-4"><input type="text" id="searchVehicleInput" placeholder="Buscar vehículo..." class="w-full p-2 border border-gray-300 rounded-md"></div>
                             <button id="exportVehicleBtn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow hover:bg-green-700">Exportar Excel</button>
                         </div>
-                        <div class="responsive-table"><table class="min-w-full bg-white border border-gray-200" id="vehicleTable"><thead><tr class="bg-gray-200 uppercase text-xs md:text-sm"><th class="py-3 px-4 text-left">Placa</th><th class="py-3 px-4 text-left">Marca/Modelo</th><th class="py-3 px-4 text-left">Tipo</th><th class="py-3 px-4 text-left">Año</th><th class="py-3 px-4 text-left">Centro</th><th class="py-3 px-4 text-left">Kilometraje</th><th class="py-3 px-4 text-left">Cap. Tanque</th><th class="py-3 px-4 text-left">Estado</th><th class="py-3 px-4 text-center">Acciones</th> </thead><tbody id="vehicleTableBody"></tbody></table></div>
+                        <div class="responsive-table"><table class="min-w-full bg-white border border-gray-200" id="vehicleTable"><thead><tr class="bg-gray-200 uppercase text-xs md:text-sm"><th class="py-3 px-4 text-left">Placa</th><th class="py-3 px-4 text-left">Marca/Modelo</th><th class="py-3 px-4 text-left">Tipo</th><th class="py-3 px-4 text-left">Año</th><th class="py-3 px-4 text-left">Centro</th><th class="py-3 px-4 text-left">Kilometraje</th><th class="py-3 px-4 text-left">Cap. Tanque</th><th class="py-3 px-4 text-left">Estado</th><th class="py-3 px-4 text-center">Acciones</th> </thead><tbody id="vehicleTableBody"></tbody></tr></div>
                     </div>
 
                     <!-- MANTENIMIENTOS -->
@@ -227,7 +227,7 @@
                             <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500"><p class="text-2xl font-bold text-purple-600" id="totalFrecuentes">0</p><p class="text-sm text-purple-600">Cargas Frecuentes</p></div>
                         </div>
                         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6"><h3 class="text-lg font-semibold p-4 bg-gray-100 border-b">🚨 Alertas por Vehículo</h3><div class="responsive-table"><table class="min-w-full bg-white" id="alertasTable"><thead class="bg-gray-200"><tr><th class="py-2 px-3 text-left">Placa</th><th class="py-2 px-3 text-left">Vehículo</th><th class="py-2 px-3 text-left">Tipo</th><th class="py-2 px-3 text-left">Rendimiento Actual</th><th class="py-2 px-3 text-left">Rendimiento Esperado</th><th class="py-2 px-3 text-left">Días desde última carga</th><th class="py-2 px-3 text-left">Alertas</th> </thead><tbody id="alertasTableBody"></tbody></table></div></div>
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden"><h3 class="text-lg font-semibold p-4 bg-gray-100 border-b">📋 Historial de Cargas por Vehículo</h3><div class="responsive-table"><table class="min-w-full bg-white" id="detalleCargasTable"><thead class="bg-gray-200"><tr><th class="py-2 px-3 text-left">Placa</th><th class="py-2 px-3 text-left">Fecha</th><th class="py-2 px-3 text-left">Kilometraje</th><th class="py-2 px-3 text-left">Litros</th><th class="py-2 px-3 text-left">Km recorridos</th><th class="py-2 px-3 text-left">Rendimiento (km/L)</th><th class="py-2 px-3 text-left">Días desde carga anterior</th><th class="py-2 px-3 text-left">Estado</th> </thead><tbody id="detalleCargasTableBody"></tbody></table></div></div>
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden"><h3 class="text-lg font-semibold p-4 bg-gray-100 border-b">📋 Historial de Cargas por Vehículo</h3><div class="responsive-table"><table class="min-w-full bg-white" id="detalleCargasTable"><thead class="bg-gray-200"><tr><th class="py-2 px-3 text-left">Placa</th><th class="py-2 px-3 text-left">Fecha</th><th class="py-2 px-3 text-left">Kilometraje</th><th class="py-2 px-3 text-left">Litros</th><th class="py-2 px-3 text-left">Km recorridos</th><th class="py-2 px-3 text-left">Rendimiento (km/L)</th><th class="py-2 px-3 text-left">Días hasta siguiente carga</th><th class="py-2 px-3 text-left">Estado</th> </thead><tbody id="detalleCargasTableBody"></tbody></table></div></div>
                     </div>
 
                     <!-- SINIESTROS -->
@@ -534,7 +534,7 @@
         }
 
         // ============================================================
-        // FUNCIÓN CORREGIDA - Historial de Cargas con orden ASCENDENTE
+        // FUNCIÓN CORREGIDA - Historial de Cargas con rendimiento en carga ANTERIOR
         // ============================================================
         function cargarHistorialCargas() {
             const tbody = document.getElementById('detalleCargasTableBody');
@@ -557,50 +557,67 @@
             
             // Procesar cada vehículo por separado
             for (const placa in cargasPorPlaca) {
-                // IMPORTANTE: Ordenar por fecha ASCENDENTE (de la más antigua a la más reciente)
+                // Ordenar por fecha ASCENDENTE (de la más antigua a la más reciente)
                 let cargas = cargasPorPlaca[placa].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
                 
-                for (let i = 0; i < cargas.length; i++) {
-                    const carga = cargas[i];
-                    let kmRecorridos = '-';
-                    let rendimiento = '-';
-                    let diasDesdeUltima = '-';
+                // PRIMERO: Calcular los rendimientos y asignarlos a la carga ANTERIOR (la que aportó el combustible)
+                for (let i = 1; i < cargas.length; i++) {
+                    const cargaActual = cargas[i];
+                    const cargaAnterior = cargas[i-1];
+                    
+                    let kmRecorridos = null;
+                    let rendimiento = null;
                     let estadoClase = '';
                     
-                    // Calcular km recorridos y rendimiento usando la carga ANTERIOR (i-1)
-                    if (i > 0 && cargas[i-1].kilometraje && carga.kilometraje) {
-                        // CORRECCIÓN: km actual - km anterior = km recorridos
-                        kmRecorridos = carga.kilometraje - cargas[i-1].kilometraje;
+                    if (cargaActual.kilometraje && cargaAnterior.kilometraje) {
+                        kmRecorridos = cargaActual.kilometraje - cargaAnterior.kilometraje;
                         
-                        if (kmRecorridos > 0 && kmRecorridos < 5000 && carga.litros > 0) {
-                            rendimiento = (kmRecorridos / carga.litros).toFixed(2);
+                        if (kmRecorridos > 0 && kmRecorridos < 5000 && cargaAnterior.litros > 0) {
+                            rendimiento = kmRecorridos / cargaAnterior.litros;
                             const vehiculo = vehicles.find(v => v.placa === placa);
                             if (vehiculo) {
                                 const esperado = obtenerRendimientoEsperadoVehiculo(vehiculo);
-                                if (parseFloat(rendimiento) < esperado * 0.6) estadoClase = 'text-red-600 font-bold';
-                                else if (parseFloat(rendimiento) < esperado * 0.8) estadoClase = 'text-yellow-600 font-semibold';
+                                if (rendimiento < esperado * 0.6) estadoClase = 'text-red-600 font-bold';
+                                else if (rendimiento < esperado * 0.8) estadoClase = 'text-yellow-600 font-semibold';
                                 else estadoClase = 'text-green-600';
                             }
-                            rendimiento += ' km/L';
-                        } else if (kmRecorridos > 0 && kmRecorridos < 5000) {
-                            rendimiento = 'Pendiente';
-                        } else if (kmRecorridos <= 0) {
-                            rendimiento = '⚠️ Km inválido';
-                        } else {
-                            rendimiento = 'N/A';
                         }
-                    } else if (i === 0 && cargas.length > 1) {
-                        // Primera carga del vehículo: no se puede calcular aún
-                        rendimiento = 'Primera carga';
-                        kmRecorridos = 'N/A';
                     }
                     
-                    // Calcular días desde carga anterior
-                    if (i > 0 && cargas[i-1].fecha) {
-                        const fechaAnt = new Date(cargas[i-1].fecha);
+                    // ASIGNAR los datos calculados a la carga ANTERIOR (la que tiene los litros que se usaron)
+                    cargaAnterior._kmRecorridos = kmRecorridos;
+                    cargaAnterior._rendimiento = rendimiento;
+                    cargaAnterior._estadoClase = estadoClase;
+                    // Guardar la fecha de la siguiente carga para calcular días
+                    cargaAnterior._fechaSiguiente = cargaActual.fecha;
+                }
+                
+                // SEGUNDO: Mostrar todas las cargas en la tabla
+                for (let i = 0; i < cargas.length; i++) {
+                    const carga = cargas[i];
+                    
+                    let kmRecorridosTexto = '-';
+                    let rendimientoTexto = '-';
+                    let estadoClase = '';
+                    let diasHastaSiguienteTexto = '-';
+                    
+                    // Usar los datos calculados que se asignaron a esta carga (si es que tiene)
+                    if (carga._kmRecorridos !== undefined && carga._kmRecorridos !== null) {
+                        kmRecorridosTexto = carga._kmRecorridos + ' km';
+                        if (carga._rendimiento !== null && carga._rendimiento !== undefined) {
+                            rendimientoTexto = carga._rendimiento.toFixed(2) + ' km/L';
+                            estadoClase = carga._estadoClase || '';
+                        } else if (carga._kmRecorridos > 0) {
+                            rendimientoTexto = 'Pendiente (sin litros)';
+                        }
+                    }
+                    
+                    // Calcular días hasta la siguiente carga (para la carga anterior)
+                    if (carga._fechaSiguiente) {
                         const fechaAct = new Date(carga.fecha);
-                        const diffDays = Math.floor((fechaAct - fechaAnt) / (1000 * 60 * 60 * 24));
-                        diasDesdeUltima = diffDays + ' días';
+                        const fechaSig = new Date(carga._fechaSiguiente);
+                        const diffDays = Math.floor((fechaSig - fechaAct) / (1000 * 60 * 60 * 24));
+                        diasHastaSiguienteTexto = diffDays + ' días';
                     }
                     
                     const row = tbody.insertRow();
@@ -609,9 +626,9 @@
                         <td class="py-2 px-3">${formatearFecha(carga.fecha)}</td>
                         <td class="py-2 px-3">${carga.kilometraje} km</td>
                         <td class="py-2 px-3">${carga.litros} L</td>
-                        <td class="py-2 px-3">${kmRecorridos !== '-' ? kmRecorridos + ' km' : '-'}</td>
-                        <td class="py-2 px-3 ${estadoClase}">${rendimiento}</td>
-                        <td class="py-2 px-3">${diasDesdeUltima}</td>
+                        <td class="py-2 px-3">${kmRecorridosTexto}</td>
+                        <td class="py-2 px-3 ${estadoClase}">${rendimientoTexto}</td>
+                        <td class="py-2 px-3">${diasHastaSiguienteTexto}</td>
                         <td class="py-2 px-3">
                             <span class="${carga.estadoPago === 'pagado' ? 'badge-pagado' : 'badge-pendiente'}">
                                 ${(carga.estadoPago || 'PENDIENTE').toUpperCase()}
@@ -1222,7 +1239,7 @@
             const totalLosTeques = stats['U.N Los Teques'].mantenimientos.total + stats['U.N Los Teques'].lavados.total + stats['U.N Los Teques'].gasolina.total + stats['U.N Los Teques'].gasoil.total;
             const totalMSO = stats['MSO'].mantenimientos.total + stats['MSO'].lavados.total + stats['MSO'].gasolina.total + stats['MSO'].gasoil.total;
             const fecha = new Date().toLocaleString('es-ES');
-            return `<div style="font-family:Arial;max-width:1200px;margin:0 auto;background:white;padding:30px"><h1 style="color:#005BAA;text-align:center;border-bottom:3px solid #005BAA;padding-bottom:15px">RELACIÓN DE GASTOS FLOTA - ${meses[mes-1].toUpperCase()} ${anio}</h1><table style="width:100%;border-collapse:collapse;border:2px solid #000;margin-bottom:40px"><thead><tr style="background:#e5e7eb"><th style="border:1px solid #000;padding:12px">CENTRO</th><th style="border:1px solid #000;padding:12px">MANTENIMIENTOS</th><th style="border:1px solid #000;padding:12px">LAVADO</th><th style="border:1px solid #000;padding:12px">GASOLINA</th><th style="border:1px solid #000;padding:12px">GASOIL</th></tr></thead><tbody><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">U.N Los Teques</td><td style="border:1px solid #000;padding:10px">Preventivos: ${stats['U.N Los Teques'].mantenimientos.preventivos}<br>Correctivos: ${stats['U.N Los Teques'].mantenimientos.correctivos}<br><strong>TOTAL: $${stats['U.N Los Teques'].mantenimientos.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Vehículos: ${stats['U.N Los Teques'].lavados.cantidad}<br><strong>TOTAL: $${stats['U.N Los Teques'].lavados.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['U.N Los Teques'].gasolina.litros.toFixed(2)} L<br><strong>TOTAL: $${stats['U.N Los Teques'].gasolina.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['U.N Los Teques'].gasoil.litros.toFixed(2)} L<br>Flete: $${stats['U.N Los Teques'].gasoil.flete.toFixed(2)}<br><strong>TOTAL: $${stats['U.N Los Teques'].gasoil.total.toFixed(2)}</strong></td> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">MSO</td><td style="border:1px solid #000;padding:10px">Preventivos: ${stats['MSO'].mantenimientos.preventivos}<br>Correctivos: ${stats['MSO'].mantenimientos.correctivos}<br><strong>TOTAL: $${stats['MSO'].mantenimientos.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Vehículos: ${stats['MSO'].lavados.cantidad}<br><strong>TOTAL: $${stats['MSO'].lavados.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['MSO'].gasolina.litros.toFixed(2)} L<br><strong>TOTAL: $${stats['MSO'].gasolina.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['MSO'].gasoil.litros.toFixed(2)} L<br>Flete: $${stats['MSO'].gasoil.flete.toFixed(2)}<br><strong>TOTAL: $${stats['MSO'].gasoil.total.toFixed(2)}</strong></td> </tr><tr style="background:#e5e7eb;font-weight:bold"><td style="border:1px solid #000;padding:10px;text-align:right">TOTALES</td><td style="border:1px solid #000;padding:10px">$${totalMant.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalLav.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalGas.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalGasoil.toFixed(2)}</td> </tr></tbody></table><div><h2 style="color:#005BAA">RESUMEN POR CENTRO</h2><table style="width:70%;border-collapse:collapse;border:2px solid #000;margin:0 auto"><tr style="background:#e5e7eb"><th style="border:1px solid #000;padding:12px">CENTRO</th><th style="border:1px solid #000;padding:12px">TOTAL</th> <tr><td style="border:1px solid #000;padding:10px;font-weight:bold">U.N Los Teques</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${totalLosTeques.toFixed(2)}</td> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">MSO</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${totalMSO.toFixed(2)}</td> </tr><tr style="background:#f0f0f0;font-weight:bold"><td style="border:1px solid #000;padding:10px">TOTAL GENERAL</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${(totalLosTeques+totalMSO).toFixed(2)}</td> </tr></table></div><div style="margin-top:50px;text-align:right;font-size:11px;color:#666;border-top:1px solid #ccc;padding-top:20px"><p>📅 Generado: ${fecha}</p><p>Sistema de Gestión de Flota U.N Los Teques</p></div></div>`;
+            return `<div style="font-family:Arial;max-width:1200px;margin:0 auto;background:white;padding:30px"><h1 style="color:#005BAA;text-align:center;border-bottom:3px solid #005BAA;padding-bottom:15px">RELACIÓN DE GASTOS FLOTA - ${meses[mes-1].toUpperCase()} ${anio}</h1><table style="width:100%;border-collapse:collapse;border:2px solid #000;margin-bottom:40px"><thead><tr style="background:#e5e7eb"><th style="border:1px solid #000;padding:12px">CENTRO</th><th style="border:1px solid #000;padding:12px">MANTENIMIENTOS</th><th style="border:1px solid #000;padding:12px">LAVADO</th><th style="border:1px solid #000;padding:12px">GASOLINA</th><th style="border:1px solid #000;padding:12px">GASOIL</th></tr></thead><tbody><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">U.N Los Teques</td><td style="border:1px solid #000;padding:10px">Preventivos: ${stats['U.N Los Teques'].mantenimientos.preventivos}<br>Correctivos: ${stats['U.N Los Teques'].mantenimientos.correctivos}<br><strong>TOTAL: $${stats['U.N Los Teques'].mantenimientos.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Vehículos: ${stats['U.N Los Teques'].lavados.cantidad}<br><strong>TOTAL: $${stats['U.N Los Teques'].lavados.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['U.N Los Teques'].gasolina.litros.toFixed(2)} L<br><strong>TOTAL: $${stats['U.N Los Teques'].gasolina.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['U.N Los Teques'].gasoil.litros.toFixed(2)} L<br>Flete: $${stats['U.N Los Teques'].gasoil.flete.toFixed(2)}<br><strong>TOTAL: $${stats['U.N Los Teques'].gasoil.total.toFixed(2)}</strong></td> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">MSO</td><td style="border:1px solid #000;padding:10px">Preventivos: ${stats['MSO'].mantenimientos.preventivos}<br>Correctivos: ${stats['MSO'].mantenimientos.correctivos}<br><strong>TOTAL: $${stats['MSO'].mantenimientos.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Vehículos: ${stats['MSO'].lavados.cantidad}<br><strong>TOTAL: $${stats['MSO'].lavados.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['MSO'].gasolina.litros.toFixed(2)} L<br><strong>TOTAL: $${stats['MSO'].gasolina.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['MSO'].gasoil.litros.toFixed(2)} L<br>Flete: $${stats['MSO'].gasoil.flete.toFixed(2)}<br><strong>TOTAL: $${stats['MSO'].gasoil.total.toFixed(2)}</strong></td> </tr><tr style="background:#e5e7eb;font-weight:bold"><td style="border:1px solid #000;padding:10px;text-align:right">TOTALES</td><td style="border:1px solid #000;padding:10px">$${totalMant.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalLav.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalGas.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalGasoil.toFixed(2)}</td> </tr></tbody></table><div><h2 style="color:#005BAA">RESUMEN POR CENTRO</h2><table style="width:70%;border-collapse:collapse;border:2px solid #000;margin:0 auto"><tr style="background:#e5e7eb"><th style="border:1px solid #000;padding:12px">CENTRO</th><th style="border:1px solid #000;padding:12px">TOTAL</th> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">U.N Los Teques</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${totalLosTeques.toFixed(2)}</td> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">MSO</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${totalMSO.toFixed(2)}</td> </tr><tr style="background:#f0f0f0;font-weight:bold"><td style="border:1px solid #000;padding:10px">TOTAL GENERAL</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${(totalLosTeques+totalMSO).toFixed(2)}</td> </tr></table></div><div style="margin-top:50px;text-align:right;font-size:11px;color:#666;border-top:1px solid #ccc;padding-top:20px"><p>📅 Generado: ${fecha}</p><p>Sistema de Gestión de Flota U.N Los Teques</p></div></div>`;
         }
 
         function actualizarVistaPreviaReporte() {
