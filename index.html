@@ -145,10 +145,10 @@
                             <div class="flex-1 md:mx-4"><input type="text" id="searchVehicleInput" placeholder="Buscar vehículo..." class="w-full p-2 border border-gray-300 rounded-md"></div>
                             <button id="exportVehicleBtn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow hover:bg-green-700">Exportar Excel</button>
                         </div>
-                        <div class="responsive-table"><table class="min-w-full bg-white border border-gray-200" id="vehicleTable"><thead><tr class="bg-gray-200 uppercase text-xs md:text-sm"><th class="py-3 px-4 text-left">Placa</th><th class="py-3 px-4 text-left">Marca/Modelo</th><th class="py-3 px-4 text-left">Tipo</th><th class="py-3 px-4 text-left">Año</th><th class="py-3 px-4 text-left">Centro</th><th class="py-3 px-4 text-left">Kilometraje</th><th class="py-3 px-4 text-left">Cap. Tanque</th><th class="py-3 px-4 text-left">Estado</th><th class="py-3 px-4 text-center">Acciones</th> </thead><tbody id="vehicleTableBody"></tbody></tr></div>
+                        <div class="responsive-table"><table class="min-w-full bg-white border border-gray-200" id="vehicleTable"><thead><tr class="bg-gray-200 uppercase text-xs md:text-sm"><th class="py-3 px-4 text-left">Placa</th><th class="py-3 px-4 text-left">Marca/Modelo</th><th class="py-3 px-4 text-left">Tipo</th><th class="py-3 px-4 text-left">Año</th><th class="py-3 px-4 text-left">Centro</th><th class="py-3 px-4 text-left">Kilometraje</th><th class="py-3 px-4 text-left">Cap. Tanque</th><th class="py-3 px-4 text-left">Estado</th><th class="py-3 px-4 text-center">Acciones</th> </thead><tbody id="vehicleTableBody"></tbody></table></div>
                     </div>
 
-                    <!-- MANTENIMIENTOS -->
+                    <!-- MANTENIMIENTOS - VERSIÓN COMPLETA CON TODOS LOS CAMPOS (como en Caracas) -->
                     <div id="mantenimientos" class="tab-pane hidden">
                         <h2 class="text-xl font-semibold text-inter-primary mb-4">Registro de Mantenimientos</h2>
                         <form id="maintenanceForm" class="form-grid mb-6">
@@ -156,8 +156,14 @@
                             <div><label for="placaMantenimiento" class="block text-sm font-medium text-gray-700">Placa</label><input list="placasList" id="placaMantenimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-inter-primary p-2" required><datalist id="placasList"></datalist></div>
                             <div><label for="tipoMantenimiento" class="block text-sm font-medium text-gray-700">Tipo</label><select id="tipoMantenimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-inter-primary p-2" required><option value="" disabled selected>Seleccione</option><option value="preventivo">Preventivo</option><option value="correctivo">Correctivo</option></select></div>
                             <div><label for="estadoPagoMantenimiento" class="block text-sm font-medium text-gray-700">Estado de Pago</label><select id="estadoPagoMantenimiento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-inter-primary p-2" required><option value="pendiente">Pendiente</option><option value="pagado">Pagado</option></select></div>
-                            <div id="camposPreventivo" class="hidden col-span-full"><label for="kilometrajePreventivo">Kilometraje</label><input type="number" id="kilometrajePreventivo" class="mt-1 block w-full rounded-md border-gray-300 p-2"><label for="descripcionPreventivo" class="mt-2">Descripción</label><textarea id="descripcionPreventivo" rows="2" class="mt-1 block w-full rounded-md border-gray-300 p-2"></textarea></div>
-                            <div id="camposCorrectivo" class="hidden col-span-full"><label for="descripcionCorrectivo">Descripción</label><textarea id="descripcionCorrectivo" rows="2" class="mt-1 block w-full rounded-md border-gray-300 p-2"></textarea><label for="causaCorrectivo" class="mt-2">Causa</label><input type="text" id="causaCorrectivo" class="mt-1 block w-full rounded-md border-gray-300 p-2"></div>
+                            <div id="camposPreventivo" class="hidden col-span-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label for="kilometrajePreventivo">Kilometraje</label><input type="number" id="kilometrajePreventivo" class="mt-1 block w-full rounded-md border-gray-300 p-2"></div>
+                                <div><label for="descripcionPreventivo">Descripción</label><textarea id="descripcionPreventivo" rows="2" class="mt-1 block w-full rounded-md border-gray-300 p-2"></textarea></div>
+                            </div>
+                            <div id="camposCorrectivo" class="hidden col-span-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label for="descripcionCorrectivo">Descripción</label><textarea id="descripcionCorrectivo" rows="2" class="mt-1 block w-full rounded-md border-gray-300 p-2"></textarea></div>
+                                <div><label for="causaCorrectivo">Causa</label><input type="text" id="causaCorrectivo" class="mt-1 block w-full rounded-md border-gray-300 p-2"></div>
+                            </div>
                             <div><label for="fechaMantenimiento">Fecha</label><input type="date" id="fechaMantenimiento" class="mt-1 block w-full rounded-md border-gray-300 p-2" required></div>
                             <div><label for="costoMantenimiento">Costo</label><input type="number" id="costoMantenimiento" class="mt-1 block w-full rounded-md border-gray-300 p-2" required></div>
                             <div><label for="proveedorTaller">Proveedor/Taller</label><input type="text" id="proveedorTaller" class="mt-1 block w-full rounded-md border-gray-300 p-2" required></div>
@@ -533,9 +539,7 @@
             return { promedioDias: promedioDias.toFixed(1), totalCargas: cargas.length };
         }
 
-        // ============================================================
-        // FUNCIÓN CORREGIDA - Historial de Cargas con rendimiento en carga ANTERIOR
-        // ============================================================
+        // Historial de Cargas con rendimiento en carga ANTERIOR
         function cargarHistorialCargas() {
             const tbody = document.getElementById('detalleCargasTableBody');
             if (!tbody) return;
@@ -548,19 +552,15 @@
                 return;
             }
             
-            // Agrupar cargas por placa
             const cargasPorPlaca = {};
             for (const carga of fuelRecords) {
                 if (!cargasPorPlaca[carga.placa]) cargasPorPlaca[carga.placa] = [];
                 cargasPorPlaca[carga.placa].push(carga);
             }
             
-            // Procesar cada vehículo por separado
             for (const placa in cargasPorPlaca) {
-                // Ordenar por fecha ASCENDENTE (de la más antigua a la más reciente)
                 let cargas = cargasPorPlaca[placa].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
                 
-                // PRIMERO: Calcular los rendimientos y asignarlos a la carga ANTERIOR (la que aportó el combustible)
                 for (let i = 1; i < cargas.length; i++) {
                     const cargaActual = cargas[i];
                     const cargaAnterior = cargas[i-1];
@@ -584,15 +584,12 @@
                         }
                     }
                     
-                    // ASIGNAR los datos calculados a la carga ANTERIOR (la que tiene los litros que se usaron)
                     cargaAnterior._kmRecorridos = kmRecorridos;
                     cargaAnterior._rendimiento = rendimiento;
                     cargaAnterior._estadoClase = estadoClase;
-                    // Guardar la fecha de la siguiente carga para calcular días
                     cargaAnterior._fechaSiguiente = cargaActual.fecha;
                 }
                 
-                // SEGUNDO: Mostrar todas las cargas en la tabla
                 for (let i = 0; i < cargas.length; i++) {
                     const carga = cargas[i];
                     
@@ -601,7 +598,6 @@
                     let estadoClase = '';
                     let diasHastaSiguienteTexto = '-';
                     
-                    // Usar los datos calculados que se asignaron a esta carga (si es que tiene)
                     if (carga._kmRecorridos !== undefined && carga._kmRecorridos !== null) {
                         kmRecorridosTexto = carga._kmRecorridos + ' km';
                         if (carga._rendimiento !== null && carga._rendimiento !== undefined) {
@@ -612,7 +608,6 @@
                         }
                     }
                     
-                    // Calcular días hasta la siguiente carga (para la carga anterior)
                     if (carga._fechaSiguiente) {
                         const fechaAct = new Date(carga.fecha);
                         const fechaSig = new Date(carga._fechaSiguiente);
@@ -791,6 +786,8 @@
                 loadMaintenanceData();
                 form.reset();
                 document.getElementById('maintenanceId').value = '';
+                document.getElementById('camposPreventivo').classList.add('hidden');
+                document.getElementById('camposCorrectivo').classList.add('hidden');
                 updateReports(); updateTotalPendienteHeader();
                 alert('✅ Mantenimiento guardado');
             });
@@ -1239,7 +1236,7 @@
             const totalLosTeques = stats['U.N Los Teques'].mantenimientos.total + stats['U.N Los Teques'].lavados.total + stats['U.N Los Teques'].gasolina.total + stats['U.N Los Teques'].gasoil.total;
             const totalMSO = stats['MSO'].mantenimientos.total + stats['MSO'].lavados.total + stats['MSO'].gasolina.total + stats['MSO'].gasoil.total;
             const fecha = new Date().toLocaleString('es-ES');
-            return `<div style="font-family:Arial;max-width:1200px;margin:0 auto;background:white;padding:30px"><h1 style="color:#005BAA;text-align:center;border-bottom:3px solid #005BAA;padding-bottom:15px">RELACIÓN DE GASTOS FLOTA - ${meses[mes-1].toUpperCase()} ${anio}</h1><table style="width:100%;border-collapse:collapse;border:2px solid #000;margin-bottom:40px"><thead><tr style="background:#e5e7eb"><th style="border:1px solid #000;padding:12px">CENTRO</th><th style="border:1px solid #000;padding:12px">MANTENIMIENTOS</th><th style="border:1px solid #000;padding:12px">LAVADO</th><th style="border:1px solid #000;padding:12px">GASOLINA</th><th style="border:1px solid #000;padding:12px">GASOIL</th></tr></thead><tbody><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">U.N Los Teques</td><td style="border:1px solid #000;padding:10px">Preventivos: ${stats['U.N Los Teques'].mantenimientos.preventivos}<br>Correctivos: ${stats['U.N Los Teques'].mantenimientos.correctivos}<br><strong>TOTAL: $${stats['U.N Los Teques'].mantenimientos.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Vehículos: ${stats['U.N Los Teques'].lavados.cantidad}<br><strong>TOTAL: $${stats['U.N Los Teques'].lavados.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['U.N Los Teques'].gasolina.litros.toFixed(2)} L<br><strong>TOTAL: $${stats['U.N Los Teques'].gasolina.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['U.N Los Teques'].gasoil.litros.toFixed(2)} L<br>Flete: $${stats['U.N Los Teques'].gasoil.flete.toFixed(2)}<br><strong>TOTAL: $${stats['U.N Los Teques'].gasoil.total.toFixed(2)}</strong></td> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">MSO</td><td style="border:1px solid #000;padding:10px">Preventivos: ${stats['MSO'].mantenimientos.preventivos}<br>Correctivos: ${stats['MSO'].mantenimientos.correctivos}<br><strong>TOTAL: $${stats['MSO'].mantenimientos.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Vehículos: ${stats['MSO'].lavados.cantidad}<br><strong>TOTAL: $${stats['MSO'].lavados.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['MSO'].gasolina.litros.toFixed(2)} L<br><strong>TOTAL: $${stats['MSO'].gasolina.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['MSO'].gasoil.litros.toFixed(2)} L<br>Flete: $${stats['MSO'].gasoil.flete.toFixed(2)}<br><strong>TOTAL: $${stats['MSO'].gasoil.total.toFixed(2)}</strong></td> </tr><tr style="background:#e5e7eb;font-weight:bold"><td style="border:1px solid #000;padding:10px;text-align:right">TOTALES</td><td style="border:1px solid #000;padding:10px">$${totalMant.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalLav.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalGas.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalGasoil.toFixed(2)}</td> </tr></tbody></table><div><h2 style="color:#005BAA">RESUMEN POR CENTRO</h2><table style="width:70%;border-collapse:collapse;border:2px solid #000;margin:0 auto"><tr style="background:#e5e7eb"><th style="border:1px solid #000;padding:12px">CENTRO</th><th style="border:1px solid #000;padding:12px">TOTAL</th> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">U.N Los Teques</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${totalLosTeques.toFixed(2)}</td> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">MSO</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${totalMSO.toFixed(2)}</td> </tr><tr style="background:#f0f0f0;font-weight:bold"><td style="border:1px solid #000;padding:10px">TOTAL GENERAL</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${(totalLosTeques+totalMSO).toFixed(2)}</td> </tr></table></div><div style="margin-top:50px;text-align:right;font-size:11px;color:#666;border-top:1px solid #ccc;padding-top:20px"><p>📅 Generado: ${fecha}</p><p>Sistema de Gestión de Flota U.N Los Teques</p></div></div>`;
+            return `<div style="font-family:Arial;max-width:1200px;margin:0 auto;background:white;padding:30px"><h1 style="color:#005BAA;text-align:center;border-bottom:3px solid #005BAA;padding-bottom:15px">RELACIÓN DE GASTOS FLOTA - ${meses[mes-1].toUpperCase()} ${anio}</h1><table style="width:100%;border-collapse:collapse;border:2px solid #000;margin-bottom:40px"><thead><tr style="background:#e5e7eb"><th style="border:1px solid #000;padding:12px">CENTRO</th><th style="border:1px solid #000;padding:12px">MANTENIMIENTOS</th><th style="border:1px solid #000;padding:12px">LAVADO</th><th style="border:1px solid #000;padding:12px">GASOLINA</th><th style="border:1px solid #000;padding:12px">GASOIL</th> </thead><tbody><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">U.N Los Teques</td><td style="border:1px solid #000;padding:10px">Preventivos: ${stats['U.N Los Teques'].mantenimientos.preventivos}<br>Correctivos: ${stats['U.N Los Teques'].mantenimientos.correctivos}<br><strong>TOTAL: $${stats['U.N Los Teques'].mantenimientos.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Vehículos: ${stats['U.N Los Teques'].lavados.cantidad}<br><strong>TOTAL: $${stats['U.N Los Teques'].lavados.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['U.N Los Teques'].gasolina.litros.toFixed(2)} L<br><strong>TOTAL: $${stats['U.N Los Teques'].gasolina.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['U.N Los Teques'].gasoil.litros.toFixed(2)} L<br>Flete: $${stats['U.N Los Teques'].gasoil.flete.toFixed(2)}<br><strong>TOTAL: $${stats['U.N Los Teques'].gasoil.total.toFixed(2)}</strong></td> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">MSO</td><td style="border:1px solid #000;padding:10px">Preventivos: ${stats['MSO'].mantenimientos.preventivos}<br>Correctivos: ${stats['MSO'].mantenimientos.correctivos}<br><strong>TOTAL: $${stats['MSO'].mantenimientos.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Vehículos: ${stats['MSO'].lavados.cantidad}<br><strong>TOTAL: $${stats['MSO'].lavados.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['MSO'].gasolina.litros.toFixed(2)} L<br><strong>TOTAL: $${stats['MSO'].gasolina.total.toFixed(2)}</strong></td><td style="border:1px solid #000;padding:10px">Litros: ${stats['MSO'].gasoil.litros.toFixed(2)} L<br>Flete: $${stats['MSO'].gasoil.flete.toFixed(2)}<br><strong>TOTAL: $${stats['MSO'].gasoil.total.toFixed(2)}</strong></td> </tr><tr style="background:#e5e7eb;font-weight:bold"><td style="border:1px solid #000;padding:10px;text-align:right">TOTALES</td><td style="border:1px solid #000;padding:10px">$${totalMant.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalLav.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalGas.toFixed(2)}</td><td style="border:1px solid #000;padding:10px">$${totalGasoil.toFixed(2)}</td> </tr></tbody></table><div><h2 style="color:#005BAA">RESUMEN POR CENTRO</h2><table style="width:70%;border-collapse:collapse;border:2px solid #000;margin:0 auto"><tr style="background:#e5e7eb"><th style="border:1px solid #000;padding:12px">CENTRO</th><th style="border:1px solid #000;padding:12px">TOTAL</th> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">U.N Los Teques</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${totalLosTeques.toFixed(2)}</td> </tr><tr><td style="border:1px solid #000;padding:10px;font-weight:bold">MSO</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${totalMSO.toFixed(2)}</td> </tr><tr style="background:#f0f0f0;font-weight:bold"><td style="border:1px solid #000;padding:10px">TOTAL GENERAL</td><td style="border:1px solid #000;padding:10px;text-align:right;color:#005BAA">$${(totalLosTeques+totalMSO).toFixed(2)}</td> </tr></table></div><div style="margin-top:50px;text-align:right;font-size:11px;color:#666;border-top:1px solid #ccc;padding-top:20px"><p>📅 Generado: ${fecha}</p><p>Sistema de Gestión de Flota U.N Los Teques</p></div></div>`;
         }
 
         function actualizarVistaPreviaReporte() {
